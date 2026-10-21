@@ -1,0 +1,92 @@
+# favsav configuration.
+#
+# Copy this file to /etc/favsav/config.ini and edit it.  See the README for a
+# full description of every option.
+#
+# Nothing here is required except the Jellyfin details and the two paths; favsav
+# runs in dry-run mode until you turn that off, and never sends mail unless the
+# [smtp] section says so.
+
+[jellyfin]
+# Base URL of your Jellyfin server.
+url = http://127.0.0.1:8096
+# API key: Dashboard -> Advanced -> API Keys.  Prefer FAVSAV_API_KEY in
+# /etc/favsav/favsav.env instead of putting the secret in this file.
+api_key =
+# Seconds to wait for the Jellyfin server.
+timeout = 30
+# Which users' favorites to back up.  Empty means the union of all users.
+users =
+
+[paths]
+# Mirror roots, comma separated.  Each entry is:
+#   <jellyfin-prefix>                            the prefix is also the local path
+#   <jellyfin-prefix>=<local-prefix>             rewrite the prefix before copying
+#   <jellyfin-prefix>=<local-prefix>=<subdir>    ...and mirror into a named subdirectory
+# The longest matching prefix wins.  Items outside every root are reported, never
+# silently dropped.
+roots = /srv/jellyfin-media
+# roots = /srv/jellyfin-media, /mnt/other-media=/mnt/other-media=other
+
+# Where the mirrored tree is written.
+dest_root = /mnt/backup
+
+[dest]
+# Refuse to run unless dest_root is a mountpoint.
+require_mount = true
+# Optional: verify the destination is on this block device.
+device =
+
+[copy]
+# copy | hardlink | symlink
+mode = copy
+# Copy same-stem .srt/.nfo/.jpg siblings, found by scanning the source directory.
+include_sidecars = true
+# Also copy the extras (trailers and friends) Jellyfin reports for an item.
+include_extras = true
+# .strm items point at a remote URL; skip them by default.
+include_strm = false
+follow_symlinks = false
+# Skip files whose size and mtime already match.
+skip_unchanged = true
+
+[prune]
+# Pruning is not a setting.  It happens only when favsav is run with --prune on the
+# command line, and it only ever removes files that favsav copied itself (see the
+# manifest).  Leave this section alone.
+
+[smtp]
+# No mail is sent unless this is turned on and the settings below are filled in.
+enabled = false
+host =
+port = 587
+# auto | starttls | ssl | none
+security = auto
+username =
+# Prefer FAVSAV_SMTP_PASSWORD in /etc/favsav/favsav.env.
+password =
+from =
+from_name = favsav
+to =
+subject_prefix = "[favsav] "
+timeout = 30
+# Also send an email when the run changed nothing.
+notify_on_noop = false
+# List pruned files in the email.
+include_removed = true
+# Also report free space on the source disk.
+include_source_disk = true
+# 0 = list every file.  SMTP servers cap message size (often ~25 MB).
+max_list_items = 0
+
+[behaviour]
+# true means plan only and touch nothing.  Set false to actually copy.
+dry_run = true
+# Restrict which item types are considered.  Empty means all of them.
+item_types =
+# How deep to expand containers (box sets, virtual seasons) before giving up.
+max_expansion_depth = 5
+
+[state]
+dir = /var/lib/favsav
+file =

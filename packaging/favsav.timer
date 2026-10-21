@@ -1,0 +1,14 @@
+[Unit]
+Description=Run favsav daily
+Documentation=https://github.com/echastain/favsav
+
+[Timer]
+OnCalendar=*-*-* 04:30:00
+# If the machine was asleep at 04:30, run as soon as it is up.
+Persistent=true
+# Spread the start a little so many machines do not hit the network at once.
+RandomizedDelaySec=15m
+Unit=favsav.service
+
+[Install]
+WantedBy=timers.target

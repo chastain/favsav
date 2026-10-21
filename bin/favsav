@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+"""Launcher for favsav.
+
+Works both from a checkout and from an installation:
+
+* From a checkout, the package directory next to ``bin/`` is put on ``sys.path``.
+* After installation, ``/usr/local/lib/favsav`` is put on ``sys.path``.
+"""
+
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+CANDIDATES = [
+    os.path.join(HERE, ".."),            # a checkout: <root>/favsav/
+    "/usr/local/lib/favsav",             # an installation
+    "/usr/lib/favsav",
+]
+
+for candidate in CANDIDATES:
+    if os.path.isdir(os.path.join(candidate, "favsav")):
+        sys.path.insert(0, os.path.abspath(candidate))
+        break
+
+from favsav.cli import main  # noqa: E402  (the path has to be set up first)
+
+if __name__ == "__main__":
+    sys.exit(main())

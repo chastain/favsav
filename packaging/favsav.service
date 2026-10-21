@@ -1,0 +1,36 @@
+[Unit]
+Description=Back up Jellyfin favorites to a secondary disk
+Documentation=https://github.com/echastain/favsav
+After=network-online.target
+Wants=network-online.target
+# Wait for the backup disk to be mounted before running.  Remove this line if the
+# destination lives on the system disk (no separate mount).
+RequiresMountsFor=/mnt/backup
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/favsav --config /etc/favsav/config.ini --prune
+User=favsav
+Group=favsav
+EnvironmentFile=-/etc/favsav/favsav.env
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+# ReadWritePaths must include the actual dest_root and the state directory.
+# Edit /mnt/backup to match your [paths] dest_root if it differs.
+ReadWritePaths=/mnt/backup /var/lib/favsav
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+
+[Install]
+WantedBy=multi-user.target
